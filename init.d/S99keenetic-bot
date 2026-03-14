@@ -1,0 +1,9 @@
+#!/bin/sh
+
+ENABLED=yes
+PROCS=keenetic-bot
+ARGS="-config /opt/etc/keenetic-bot.yaml"
+PRECMD=
+POSTCMD=
+
+. /opt/etc/init.d/rc.func

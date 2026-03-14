@@ -1,0 +1,8 @@
+telegram:
+  token: "YOUR_BOT_TOKEN"
+  allowed_user_ids:
+    - 123456789  # твой Telegram user ID
+
+router:
+  # путь к бинарнику xkeen (значение по умолчанию: /opt/sbin/xkeen)
+  xkeen_path: "/opt/sbin/xkeen"
