@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 
@@ -44,6 +45,12 @@ func (b *Bot) handleSysInfo(c tele.Context) error {
 		xh := int(xrayUp.Hours()) % 24
 		xm := int(xrayUp.Minutes()) % 60
 		lines = append(lines, fmt.Sprintf("xray: %dд %dч %dм", xd, xh, xm))
+	}
+	if xkeenStat, err := os.Stat(b.cfg.Router.XkeenPath); err == nil {
+		lines = append(lines, fmt.Sprintf("XKeen: %s", xkeenStat.ModTime().Format("02 Jan 2006")))
+	}
+	if geoTime, err := router.GeoUpdateTime(b.cfg.Router.XkeenDatDir); err == nil {
+		lines = append(lines, fmt.Sprintf("Geo: %s", geoTime.Format("02 Jan 2006 15:04")))
 	}
 	return c.Send(strings.Join(lines, "\n"))
 }

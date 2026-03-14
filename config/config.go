@@ -18,7 +18,8 @@ type TelegramConfig struct {
 }
 
 type RouterConfig struct {
-	XkeenPath string `yaml:"xkeen_path"`
+	XkeenPath  string `yaml:"xkeen_path"`
+	XkeenDatDir string `yaml:"xkeen_dat_dir"`
 }
 
 func Load(path string) (*Config, error) {
@@ -32,6 +33,9 @@ func Load(path string) (*Config, error) {
 	}
 	if cfg.Router.XkeenPath == "" {
 		cfg.Router.XkeenPath = "/opt/sbin/xkeen"
+	}
+	if cfg.Router.XkeenDatDir == "" {
+		cfg.Router.XkeenDatDir = "/opt/etc/xray/dat"
 	}
 	return &cfg, nil
 }

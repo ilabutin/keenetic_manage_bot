@@ -8,6 +8,34 @@ import (
 	"time"
 )
 
+// GeoUpdateTime returns the most recent modification time among non-symlink .dat files in dir.
+func GeoUpdateTime(dir string) (time.Time, error) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("read dat dir: %w", err)
+	}
+	var latest time.Time
+	for _, e := range entries {
+		if e.Type()&os.ModeSymlink != 0 {
+			continue // skip symlinks
+		}
+		if !strings.HasSuffix(e.Name(), ".dat") {
+			continue
+		}
+		info, err := e.Info()
+		if err != nil {
+			continue
+		}
+		if info.ModTime().After(latest) {
+			latest = info.ModTime()
+		}
+	}
+	if latest.IsZero() {
+		return time.Time{}, fmt.Errorf("no .dat files found in %s", dir)
+	}
+	return latest, nil
+}
+
 // ProcessUptime returns how long the process named procName has been running.
 // It reads /proc/*/comm to find the PID, then calculates uptime via /proc/<pid>/stat.
 func ProcessUptime(procName string) (time.Duration, error) {
