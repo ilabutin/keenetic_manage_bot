@@ -17,6 +17,86 @@ type Client struct {
 	TxBytes uint64
 }
 
+// WireguardPeer represents a configured WireGuard peer.
+type WireguardPeer struct {
+	Description    string
+	Online         bool
+	RemoteEndpoint string
+	RxBytes        uint64
+	TxBytes        uint64
+}
+
+// WireguardPeers returns all configured peers from `ndmc -c "show interface <iface>"`.
+func WireguardPeers(iface string) ([]WireguardPeer, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	out, err := run(ctx, "/bin/ndmc", "-c", "show interface "+iface)
+	if err != nil {
+		return nil, fmt.Errorf("ndmc: %w\n%s", err, out)
+	}
+	return parseWireguardInterface(out), nil
+}
+
+// parseWireguardInterface parses `ndmc -c "show interface <iface>"` output.
+func parseWireguardInterface(raw string) []WireguardPeer {
+	var peers []WireguardPeer
+	cur := map[string]string{}
+	inPeer := false
+
+	flush := func() {
+		defer func() {
+			cur = map[string]string{}
+			inPeer = false
+		}()
+		if !inPeer || cur["description"] == "" {
+			return
+		}
+		rx, _ := strconv.ParseUint(cur["rxbytes"], 10, 64)
+		tx, _ := strconv.ParseUint(cur["txbytes"], 10, 64)
+		peers = append(peers, WireguardPeer{
+			Description:    cur["description"],
+			Online:         cur["online"] == "yes",
+			RemoteEndpoint: cur["remote-endpoint-address"],
+			RxBytes:        rx,
+			TxBytes:        tx,
+		})
+	}
+
+	for _, line := range strings.Split(raw, "\n") {
+		line = strings.TrimSpace(line)
+		if line == "peer:" {
+			flush()
+			inPeer = true
+			continue
+		}
+		if line == "summary:" {
+			flush()
+			break
+		}
+		if !inPeer {
+			continue
+		}
+		idx := strings.Index(line, ":")
+		if idx <= 0 {
+			continue
+		}
+		key := strings.TrimSpace(line[:idx])
+		val := strings.TrimSpace(line[idx+1:])
+		if val == "" {
+			continue
+		}
+		switch key {
+		case "description", "online", "rxbytes", "txbytes", "remote-endpoint-address":
+			if _, ok := cur[key]; !ok {
+				cur[key] = val
+			}
+		}
+	}
+	flush()
+	return peers
+}
+
 // ConnectedClients returns active clients from `ndmc -c "show ip hotspot"`.
 func ConnectedClients() ([]Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

@@ -103,41 +103,81 @@ func (b *Bot) handleClients(c tele.Context) error {
 	if err != nil {
 		return c.Send(fmt.Sprintf("Ошибка: %v", err))
 	}
-	if len(clients) == 0 {
+
+	var peers []router.WireguardPeer
+	if b.cfg.Router.WireguardIface != "" {
+		peers, _ = router.WireguardPeers(b.cfg.Router.WireguardIface)
+	}
+
+	if len(clients) == 0 && len(peers) == 0 {
 		return c.Send("Нет подключённых устройств.")
 	}
 
-	sort.Slice(clients, func(i, j int) bool {
-		ni, nj := clients[i].Network, clients[j].Network
-		if ni == nj {
-			return clients[i].Name < clients[j].Name
-		}
-		if ni == "Home" {
-			return true
-		}
-		if nj == "Home" {
-			return false
-		}
-		return ni < nj
-	})
-
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Подключено: %d\n\n", len(clients)))
-	for _, cl := range clients {
-		name := cl.Name
-		if name == "" {
-			name = cl.MAC
+
+	if len(clients) > 0 {
+		sort.Slice(clients, func(i, j int) bool {
+			ni, nj := clients[i].Network, clients[j].Network
+			if ni == nj {
+				return clients[i].Name < clients[j].Name
+			}
+			if ni == "Home" {
+				return true
+			}
+			if nj == "Home" {
+				return false
+			}
+			return ni < nj
+		})
+
+		sb.WriteString(fmt.Sprintf("Подключено: %d\n\n", len(clients)))
+		for _, cl := range clients {
+			name := cl.Name
+			if name == "" {
+				name = cl.MAC
+			}
+			network := cl.Network
+			if network == "" {
+				network = "—"
+			}
+			traffic := ""
+			if cl.RxBytes > 0 || cl.TxBytes > 0 {
+				traffic = fmt.Sprintf(" ↓%s ↑%s", formatBytes(cl.RxBytes), formatBytes(cl.TxBytes))
+			}
+			sb.WriteString(fmt.Sprintf("• %s — %s [%s]%s\n", name, cl.IP, network, traffic))
 		}
-		network := cl.Network
-		if network == "" {
-			network = "—"
-		}
-		traffic := ""
-		if cl.RxBytes > 0 || cl.TxBytes > 0 {
-			traffic = fmt.Sprintf(" ↓%s ↑%s", formatBytes(cl.RxBytes), formatBytes(cl.TxBytes))
-		}
-		sb.WriteString(fmt.Sprintf("• %s — %s [%s]%s\n", name, cl.IP, network, traffic))
 	}
+
+	if len(peers) > 0 {
+		sort.Slice(peers, func(i, j int) bool {
+			if peers[i].Online != peers[j].Online {
+				return peers[i].Online
+			}
+			return peers[i].Description < peers[j].Description
+		})
+		online := 0
+		for _, p := range peers {
+			if p.Online {
+				online++
+			}
+		}
+		if sb.Len() > 0 {
+			sb.WriteString("\n")
+		}
+		sb.WriteString(fmt.Sprintf("WireGuard (%d/%d онлайн):\n\n", online, len(peers)))
+		for _, p := range peers {
+			if p.Online {
+				traffic := ""
+				if p.RxBytes > 0 || p.TxBytes > 0 {
+					traffic = fmt.Sprintf(" ↓%s ↑%s", formatBytes(p.RxBytes), formatBytes(p.TxBytes))
+				}
+				sb.WriteString(fmt.Sprintf("• %s — %s%s\n", p.Description, p.RemoteEndpoint, traffic))
+			} else {
+				sb.WriteString(fmt.Sprintf("• %s — офлайн\n", p.Description))
+			}
+		}
+	}
+
 	return c.Send(sb.String())
 }
 

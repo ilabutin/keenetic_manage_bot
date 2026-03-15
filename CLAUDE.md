@@ -29,7 +29,7 @@ bot/
   middleware.go      — allowOnly(): rejects non-whitelisted Telegram user IDs
 router/
   router.go          — run() helper (exec + ANSI strip), Reboot(), XkeenCmd()
-  clients.go         — ConnectedClients() + parseHotspot() for ndmc text output
+  clients.go         — ConnectedClients() + parseHotspot() for ndmc text output; WireguardPeers() + parseWireguardInterface()
   sysinfo.go         — SystemInfo(), GeoUpdateTime(), ProcessUptime()
 init.d/
   S99keenetic-bot    — Entware init script (uses rc.func)
@@ -44,13 +44,14 @@ init.d/
 | Command | Description |
 |---|---|
 | `/sysinfo` | Uptime, load, RAM, xray uptime, xkeen/geo file dates |
-| `/clients` | Active devices sorted by network (Home first), with rx/tx traffic |
+| `/clients` | Active devices sorted by network (Home first), with rx/tx traffic; WireGuard peers (online/offline) if `wireguard_iface` is configured |
 | `/xkeen <start\|stop\|restart\|status>` | Calls `/opt/sbin/xkeen -<action>` |
 | `/reboot` | Reboots the router |
 
 ## Router commands used
 
 - `/bin/ndmc -c "show ip hotspot"` — active DHCP clients (text format, not JSON)
+- `/bin/ndmc -c "show interface <iface>"` — WireGuard interface + peer status
 - `/opt/sbin/xkeen -<action>` — xkeen management
 - `reboot` — system reboot
 - `/proc/uptime`, `/proc/loadavg`, `/proc/meminfo` — read directly in Go
@@ -67,6 +68,7 @@ telegram:
 router:
   xkeen_path: "/opt/sbin/xkeen"       # default
   xkeen_dat_dir: "/opt/etc/xray/dat"  # default
+  wireguard_iface: "Wireguard0"       # optional; omit to hide WireGuard section in /clients
 ```
 
 ## Router
@@ -80,3 +82,5 @@ router:
 ## ndmc output format
 
 `ndmc -c "show ip hotspot"` returns indented text (not JSON). Each device block starts with `host:`, contains `mac/ip/hostname/name/mws-backhaul`, then an `interface:` sub-block (id/name/description), then `active: yes/no`, `rxbytes`, `txbytes`. Symlinks in dat dir are skipped when reading mod times.
+
+`ndmc -c "show interface Wireguard0"` returns indented text. After interface-level fields, each `peer:` block contains `description`, `online: yes/no`, `rxbytes`, `txbytes`, `remote-endpoint-address`. The `public-key:` value appears on its own continuation line (no colon). Peer blocks end at `summary:`.

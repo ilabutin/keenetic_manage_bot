@@ -6,3 +6,5 @@ telegram:
 router:
   # путь к бинарнику xkeen (значение по умолчанию: /opt/sbin/xkeen)
   xkeen_path: "/opt/sbin/xkeen"
+  # имя WireGuard-интерфейса для отображения пиров в /clients (если не задано — секция не показывается)
+  wireguard_iface: "Wireguard0"

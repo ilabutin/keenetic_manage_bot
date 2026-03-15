@@ -18,8 +18,9 @@ type TelegramConfig struct {
 }
 
 type RouterConfig struct {
-	XkeenPath  string `yaml:"xkeen_path"`
-	XkeenDatDir string `yaml:"xkeen_dat_dir"`
+	XkeenPath      string `yaml:"xkeen_path"`
+	XkeenDatDir    string `yaml:"xkeen_dat_dir"`
+	WireguardIface string `yaml:"wireguard_iface"`
 }
 
 func Load(path string) (*Config, error) {
