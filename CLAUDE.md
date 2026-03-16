@@ -41,6 +41,8 @@ init.d/
 
 **Security:** global `allowOnly` middleware — only `telegram.allowed_user_ids` from config can use the bot.
 
+**Reply keyboard:** `mainMenu` (defined in `handlers.go`) is a persistent ResizeKeyboard sent on `/start`/`/help`. Rows: `/sysinfo`+`/clients`; `/xkeen status`+`/xkeen restart`; `/unroute`+`/reboot`. No button for `/route` (requires domain argument).
+
 ## Bot commands
 
 | Command | Description |

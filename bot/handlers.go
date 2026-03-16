@@ -10,14 +10,26 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
+var mainMenu = func() *tele.ReplyMarkup {
+	m := &tele.ReplyMarkup{ResizeKeyboard: true}
+	m.Reply(
+		m.Row(m.Text("/sysinfo"), m.Text("/clients")),
+		m.Row(m.Text("/xkeen status"), m.Text("/xkeen restart")),
+		m.Row(m.Text("/unroute"), m.Text("/reboot")),
+	)
+	return m
+}()
+
 func (b *Bot) handleStart(c tele.Context) error {
-	return c.Send("Keenetic bot.\n\n" +
-		"/sysinfo — состояние роутера\n" +
-		"/clients — подключённые устройства\n" +
-		"/xkeen <start|stop|restart|status> — управление xkeen\n" +
-		"/route <домен> — добавить домен в роутинг\n" +
-		"/unroute — удалить запись из роутинга\n" +
-		"/reboot — перезагрузить роутер")
+	return c.Send("Keenetic bot.\n\n"+
+		"/sysinfo — состояние роутера\n"+
+		"/clients — подключённые устройства\n"+
+		"/xkeen <start|stop|restart|status> — управление xkeen\n"+
+		"/route <домен> — добавить домен в роутинг\n"+
+		"/unroute — удалить запись из роутинга\n"+
+		"/reboot — перезагрузить роутер",
+		mainMenu,
+	)
 }
 
 func (b *Bot) handleSysInfo(c tele.Context) error {
