@@ -15,6 +15,8 @@ func (b *Bot) handleStart(c tele.Context) error {
 		"/sysinfo — состояние роутера\n" +
 		"/clients — подключённые устройства\n" +
 		"/xkeen <start|stop|restart|status> — управление xkeen\n" +
+		"/route <домен> — добавить домен в роутинг\n" +
+		"/unroute — удалить запись из роутинга\n" +
 		"/reboot — перезагрузить роутер")
 }
 

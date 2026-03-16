@@ -8,3 +8,10 @@ router:
   xkeen_path: "/opt/sbin/xkeen"
   # имя WireGuard-интерфейса для отображения пиров в /clients (если не задано — секция не показывается)
   wireguard_iface: "Wireguard0"
+
+  # /route: путь к xk-geodat и routing.json, список правил для выбора
+  geodat_tool: "/opt/etc/xkeen-ui/bin/xk-geodat"
+  routing_file: "/opt/etc/xray/configs/05_routing.json"
+  routing_outbounds:
+    - "vless-reality"
+    - "vless-reality-fi"

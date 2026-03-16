@@ -3,6 +3,7 @@ package bot
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/igorvoltaic/keenetic-bot/config"
@@ -10,8 +11,10 @@ import (
 )
 
 type Bot struct {
-	cfg    *config.Config
-	telebot *tele.Bot
+	cfg           *config.Config
+	telebot       *tele.Bot
+	routeStates   sync.Map // int64 → *routeState
+	unrouteStates sync.Map // int64 → *unrouteState
 }
 
 func New(cfg *config.Config) (*Bot, error) {
@@ -48,4 +51,12 @@ func (b *Bot) registerHandlers() {
 	b.telebot.Handle("/clients", b.handleClients)
 	b.telebot.Handle("/xkeen", b.handleXkeen)
 	b.telebot.Handle("/reboot", b.handleReboot)
+	b.telebot.Handle("/route", b.handleRoute)
+	b.telebot.Handle(&btnRouteSel, b.handleRouteSel)
+	b.telebot.Handle(&btnRouteOut, b.handleRouteOut)
+	b.telebot.Handle("/unroute", b.handleUnroute)
+	b.telebot.Handle(&btnUnrouteRule, b.handleUnrouteRule)
+	b.telebot.Handle(&btnUnrouteEntry, b.handleUnrouteEntry)
+	b.telebot.Handle(&btnUnrouteAct, b.handleUnrouteAct)
+	b.telebot.Handle(&btnUnrouteBack, b.handleUnrouteBack)
 }
