@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/igorvoltaic/keenetic-bot/bot"
-	"github.com/igorvoltaic/keenetic-bot/config"
+	"github.com/ilabutin/keenetic_manage_bot/bot"
+	"github.com/ilabutin/keenetic_manage_bot/config"
 )
 
 func main() {

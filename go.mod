@@ -1,4 +1,4 @@
-module github.com/igorvoltaic/keenetic-bot
+module github.com/ilabutin/keenetic_manage_bot
 
 go 1.22
 

@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/igorvoltaic/keenetic-bot/router"
+	"github.com/ilabutin/keenetic_manage_bot/router"
 	tele "gopkg.in/telebot.v3"
 )
 

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/igorvoltaic/keenetic-bot/config"
+	"github.com/ilabutin/keenetic_manage_bot/config"
 	tele "gopkg.in/telebot.v3"
 )
 
